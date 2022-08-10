@@ -16,46 +16,56 @@ namespace AppDownholes
     public partial class MainForm : Form
     {
 
-        private SQLiteConnection SQLiteConnection = null;
+        private SQLiteConnection DBConnection = null;
 
-        private SQLiteCommandBuilder SQLiteBuilder = null;
+        private SQLiteCommandBuilder BuilderDownholes = null;
 
-        private SQLiteDataAdapter SQLiteDataAdapter = null;
+        private SQLiteDataAdapter DataAdapterDownholes = null;
 
-        private DataSet dataSet = null;
+        private DataSet dataSetDownholes = null;
 
         private bool newRowAdding = false;
-       
+
         public MainForm()
         {
             InitializeComponent();
         }
-
+        
         private void LoadData()
         {
             try
             {
-                SQLiteDataAdapter = new SQLiteDataAdapter("SELECT *, 'Delete' AS [Command] FROM [Table]", SQLiteConnection);
+                DataAdapterDownholes = new SQLiteDataAdapter("SELECT *, 'Delete' AS [Command] FROM [Table]", DBConnection);
 
-                SQLiteBuilder = new SQLiteCommandBuilder(SQLiteDataAdapter);
+                BuilderDownholes = new SQLiteCommandBuilder(DataAdapterDownholes);
 
-                SQLiteBuilder.GetInsertCommand();
-                SQLiteBuilder.GetUpdateCommand();
-                SQLiteBuilder.GetDeleteCommand();
+                BuilderDownholes.GetInsertCommand();
+                BuilderDownholes.GetUpdateCommand();
+                BuilderDownholes.GetDeleteCommand();
 
-                dataSet = new DataSet();
+                dataSetDownholes = new DataSet();
 
-                SQLiteDataAdapter.Fill(dataSet, "Table");
+                DataAdapterDownholes.Fill(dataSetDownholes, "Table");
 
-                dataGridView1.DataSource = dataSet.Tables["Table"];
+                dataGridView1.DataSource = dataSetDownholes.Tables["Table"];
 
-                              
                 for (int i = 0; i < dataGridView1.Rows.Count; i++)
                 {
                     DataGridViewLinkCell linkCell = new DataGridViewLinkCell();
 
-                    dataGridView1[14, i] = linkCell;  
+                    dataGridView1[14, i] = linkCell;
                 }
+
+                dataGridView1.Columns[0].Width = 30;
+                dataGridView1.Columns[1].Width = 90;
+                dataGridView1.Columns[2].Width = 120;
+                dataGridView1.Columns[3].Width = 50;
+                dataGridView1.Columns[4].Width = 80;
+                dataGridView1.Columns[6].Width = 150;
+                dataGridView1.Columns[8].Width = 100;
+                dataGridView1.Columns[12].Width = 120;
+                dataGridView1.Columns[13].Width = 150;
+                dataGridView1.Columns[14].Width = 80;
             }
 
             catch (Exception ex)
@@ -68,11 +78,11 @@ namespace AppDownholes
         {
             try
             {
-                dataSet.Tables["Table"].Clear();
+                dataSetDownholes.Tables["Table"].Clear();
 
-                SQLiteDataAdapter.Fill(dataSet, "Table");
+                DataAdapterDownholes.Fill(dataSetDownholes, "Table");
 
-                dataGridView1.DataSource = dataSet.Tables["Table"];
+                dataGridView1.DataSource = dataSetDownholes.Tables["Table"];
 
                 for (int i = 0; i < dataGridView1.Rows.Count; i++)
                 {
@@ -90,24 +100,15 @@ namespace AppDownholes
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            SQLiteConnection = new SQLiteConnection("Data Source=DownholesDB.db;Version=3");
+            DBConnection = new SQLiteConnection("Data Source=DownholesDB.db;Version=3");
 
-            SQLiteConnection.Open();
+            DBConnection.Open();
 
             LoadData();
+
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void butSave_Click(object sender, EventArgs e)
-        {
-            ReloadData();
-        }
-
-        private void dataGridView1_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
         {
             try
             {
@@ -123,23 +124,23 @@ namespace AppDownholes
 
                             dataGridView1.Rows.RemoveAt(rowIndex);
 
-                            dataSet.Tables["Table"].Rows[rowIndex].Delete();
+                            dataSetDownholes.Tables["Table"].Rows[rowIndex].Delete();
 
-                            SQLiteDataAdapter.Update(dataSet,"Table");
+                            DataAdapterDownholes.Update(dataSetDownholes, "Table");
                         }
                     }
                     else if (task == "Insert")
                     {
                         int rowIndex = dataGridView1.Rows.Count - 2;
 
-                        DataRow row = dataSet.Tables["Table"].NewRow();
+                        DataRow row = dataSetDownholes.Tables["Table"].NewRow();
 
                         row["Дата"] = dataGridView1.Rows[rowIndex].Cells["Дата"].Value;
                         row["Месторождение"] = dataGridView1.Rows[rowIndex].Cells["Месторождение"].Value;
                         row["Куст"] = dataGridView1.Rows[rowIndex].Cells["Куст"].Value;
                         row["Номер скважины"] = dataGridView1.Rows[rowIndex].Cells["Номер скважины"].Value;
                         row["Тип прибора"] = dataGridView1.Rows[rowIndex].Cells["Тип прибора"].Value;
-                        row["Метод иследования"] = dataGridView1.Rows[rowIndex].Cells["Метод иследования"].Value;
+                        row["Метод исследования"] = dataGridView1.Rows[rowIndex].Cells["Метод исследования"].Value;
                         row["Номер прибора"] = dataGridView1.Rows[rowIndex].Cells["Номер прибора"].Value;
                         row["Недропользователь"] = dataGridView1.Rows[rowIndex].Cells["Недропользователь"].Value;
                         row["Заказчик"] = dataGridView1.Rows[rowIndex].Cells["Заказчик"].Value;
@@ -148,15 +149,15 @@ namespace AppDownholes
                         row["Расположение файлов"] = dataGridView1.Rows[rowIndex].Cells["Расположение файлов"].Value;
                         row["Дополнительная информация"] = dataGridView1.Rows[rowIndex].Cells["Дополнительная информация"].Value;
 
-                        dataSet.Tables["Table"].Rows.Add(row);
+                        dataSetDownholes.Tables["Table"].Rows.Add(row);
 
-                        dataSet.Tables["Table"].Rows.RemoveAt(dataSet.Tables["Table"].Rows.Count - 1);
+                        dataSetDownholes.Tables["Table"].Rows.RemoveAt(dataSetDownholes.Tables["Table"].Rows.Count - 1);
 
                         dataGridView1.Rows.RemoveAt(dataGridView1.Rows.Count - 2);
 
                         dataGridView1.Rows[e.RowIndex].Cells[14].Value = "Delete";
 
-                        SQLiteDataAdapter.Update(dataSet, "Table");
+                        DataAdapterDownholes.Update(dataSetDownholes, "Table");
 
                         newRowAdding = false;
                     }
@@ -164,21 +165,21 @@ namespace AppDownholes
                     {
                         int r = e.RowIndex;
 
-                        dataSet.Tables["Table"].Rows[r]["Дата"] = dataGridView1.Rows[r].Cells["Дата"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Месторождение"] = dataGridView1.Rows[r].Cells["Месторождение"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Куст"] = dataGridView1.Rows[r].Cells["Куст"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Номер скважины"] = dataGridView1.Rows[r].Cells["Номер скважины"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Тип прибора"] = dataGridView1.Rows[r].Cells["Тип прибора"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Метод иследования"] = dataGridView1.Rows[r].Cells["Метод иследования"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Номер прибора"] = dataGridView1.Rows[r].Cells["Номер прибора"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Недропользователь"] = dataGridView1.Rows[r].Cells["Недропользователь"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Заказчик"] = dataGridView1.Rows[r].Cells["Заказчик"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Подрядчик"] = dataGridView1.Rows[r].Cells["Подрядчик"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Начальник партии"] = dataGridView1.Rows[r].Cells["Начальник партии"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Расположение файлов"] = dataGridView1.Rows[r].Cells["Расположение файлов"].Value;
-                        dataSet.Tables["Table"].Rows[r]["Дополнительная информация"] = dataGridView1.Rows[r].Cells["Дополнительная информация"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Дата"] = dataGridView1.Rows[r].Cells["Дата"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Месторождение"] = dataGridView1.Rows[r].Cells["Месторождение"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Куст"] = dataGridView1.Rows[r].Cells["Куст"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Номер скважины"] = dataGridView1.Rows[r].Cells["Номер скважины"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Тип прибора"] = dataGridView1.Rows[r].Cells["Тип прибора"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Метод исследования"] = dataGridView1.Rows[r].Cells["Метод исследования"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Номер прибора"] = dataGridView1.Rows[r].Cells["Номер прибора"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Недропользователь"] = dataGridView1.Rows[r].Cells["Недропользователь"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Заказчик"] = dataGridView1.Rows[r].Cells["Заказчик"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Подрядчик"] = dataGridView1.Rows[r].Cells["Подрядчик"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Начальник партии"] = dataGridView1.Rows[r].Cells["Начальник партии"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Расположение файлов"] = dataGridView1.Rows[r].Cells["Расположение файлов"].Value;
+                        dataSetDownholes.Tables["Table"].Rows[r]["Дополнительная информация"] = dataGridView1.Rows[r].Cells["Дополнительная информация"].Value;
 
-                        SQLiteDataAdapter.Update(dataSet, "Table");
+                        DataAdapterDownholes.Update(dataSetDownholes, "Table");
 
                         dataGridView1.Rows[e.RowIndex].Cells[14].Value = "Delete";
                     }
@@ -247,7 +248,7 @@ namespace AppDownholes
         {
             e.Control.KeyPress -= new KeyPressEventHandler(Column_KeyPress);
 
-            if (dataGridView1.CurrentCell.ColumnIndex == 4|| dataGridView1.CurrentCell.ColumnIndex == 5|| dataGridView1.CurrentCell.ColumnIndex == 8)
+            if (dataGridView1.CurrentCell.ColumnIndex == 3|| dataGridView1.CurrentCell.ColumnIndex == 4|| dataGridView1.CurrentCell.ColumnIndex == 7)
             {
                 TextBox textBox = e.Control as TextBox;
 
@@ -264,6 +265,100 @@ namespace AppDownholes
             {
                 e.Handled = true;
             }
+        }
+
+        private void buttonSearch_Click(object sender, EventArgs e)
+        {
+            if (textBoxNumberDownhole.Text !="" || textBoxMine.Text !="")
+            {
+                textBoxResultSearch.Clear();
+
+                SQLiteCommand searchCommand = DBConnection.CreateCommand();
+                searchCommand.CommandText = $"SELECT * FROM [Table] WHERE [Месторождение] LIKE '%{textBoxMine.Text}%' AND [Номер скважины] LIKE '%{textBoxNumberDownhole.Text}%'";              
+
+                SQLiteDataReader dataReader = searchCommand.ExecuteReader();
+
+                if (dataReader.HasRows)
+                {
+                    while (dataReader.Read())
+                    {
+                            textBoxResultSearch.Text += 
+                            "Номер скважины: " + dataReader["Номер скважины"] + 
+                            "   Месторождение: " + dataReader["Месторождение"] +
+                            "   Тип прибора: " + dataReader["Тип прибора"] + 
+                            "   Дата: " + dataReader["Дата"] + 
+                            "   Метод: " + dataReader["Метод исследования"] + "\r\n";
+                    }
+                }
+                else
+                {
+                    textBoxResultSearch.Text = "Не найдено!";
+                }
+            }
+            else
+            {
+                textBoxResultSearch.Text = "Параметры не заданы!";
+            }
+        }
+
+        private void buttonClearSearch_Click(object sender, EventArgs e)
+        {
+            textBoxResultSearch.Clear();
+            textBoxNumberDownhole.Clear();
+            textBoxMine.Clear();
+        }
+       
+        
+
+        private void buttonStatistics_Click(object sender, EventArgs e)
+        {
+            textBoxFindStatistics.Clear();
+
+            SQLiteCommand allrowsCommand = DBConnection.CreateCommand();
+            allrowsCommand.CommandText = $"SELECT COUNT (*) FROM [Table]";
+            double allrows = Convert.ToDouble(allrowsCommand.ExecuteScalar());
+            
+
+            if (comboBoxStatistics.Text != "" && textBoxStatistics.Text != "")
+            {
+                SQLiteCommand statisticsCommand = DBConnection.CreateCommand();
+                statisticsCommand.CommandText = $"SELECT * FROM [Table] WHERE [{comboBoxStatistics.Text}] LIKE '%{textBoxStatistics.Text}%'";
+
+                double result = 0;
+                                                               
+                SQLiteDataReader dataReader = statisticsCommand.ExecuteReader();
+
+                if (dataReader.HasRows)
+                {
+                    textBoxFindStatistics.Text += "Даты исследований:" + "\r\n";
+
+                    while (dataReader.Read())
+                    {
+                        textBoxFindStatistics.Text +=dataReader["Дата"] + "\r\n";       
+                        result++;
+                    }
+
+                    string percent = string.Format("{0:P}", result / allrows);
+                    textBoxFindStatistics.Text += "Скважины исследовались " + result + " раз" + "\r\n" + 
+                        "Исследований с данным значенем " + percent;
+                }
+                else
+                {
+                    textBoxFindStatistics.Text = "Не найдено!";
+                }
+
+            }
+
+            else
+            {
+                textBoxFindStatistics.Text = "Параметры не заданы!";
+            }
+        }
+
+        private void buttonClearStatistics_Click(object sender, EventArgs e)
+        {
+            textBoxFindStatistics.Clear();
+            textBoxStatistics.Clear();
         }
     }
 }
